@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Circuito 4 · LED y Potenciómetro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --purple-deep: #1a0a2e;
+      --purple-dark: #2d0f4e;
+      --purple-mid: #4a1a7a;
+      --purple-bright: #8b2fc9;
+      --purple-neon: #c44dff;
+      --acid-yellow: #d4ff00;
+      --acid-green: #39ff14;
+      --white: #f0e6ff;
+      --grey: #9a8ab0;
+      --surface: rgba(45, 15, 78, 0.6);
+      --border: rgba(196, 77, 255, 0.2);
+      --mono: 'Space Mono', monospace;
+      --display: 'Bebas Neue', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--purple-deep);
+      color: var(--white);
+      font-family: var(--mono);
+      overflow-x: hidden;
+      cursor: none;
+      min-height: 100vh;
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 14px; height: 14px;
+      background: var(--acid-yellow);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    /* ─── SPRAY DECOS ─────────────────────── */
+    .spray {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .spray-1 { width: 500px; height: 500px; background: var(--purple-bright); top: -100px; right: -120px; opacity: 0.3; }
+    .spray-2 { width: 350px; height: 350px; background: var(--purple-neon); bottom: 50px; left: -80px; opacity: 0.15; }
+    .spray-3 { width: 200px; height: 200px; background: var(--acid-yellow); top: 60%; left: 60%; opacity: 0.07; }
+
+    /* Tape lines */
+    .tape {
+      position: absolute;
+      width: 120%; height: 6px;
+      background: var(--acid-yellow);
+      top: 35%; left: -10%;
+      transform: rotate(-2deg);
+      opacity: 0.4; z-index: 0;
+    }
+
+    /* ─── HEADER ─────────────────────────── */
+    header {
+      position: relative;
+      padding: 3rem 5vw 2.5rem;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .header-tag {
+      display: inline-block;
+      background: var(--acid-yellow);
+      color: var(--purple-deep);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.35rem 1.1rem;
+      margin-bottom: 1.2rem;
+      clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    }
+
+    header h1 {
+      font-family: 'Permanent Marker', cursive;
+      font-size: clamp(2.4rem, 7vw, 5rem);
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+      text-shadow: 4px 4px 0 var(--purple-bright), 8px 8px 0 var(--purple-deep);
+    }
+
+    header h1 em {
+      font-style: normal;
+      color: var(--acid-yellow);
+      display: block;
+    }
+
+    .header-meta {
+      font-size: 11px;
+      color: var(--grey);
+      margin-top: 1.2rem;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .header-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-meta span::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--purple-neon);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ─── NAV ────────────────────────────── */
+    .nav-wrap {
+      background: var(--purple-dark);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+
+    .nav-btn {
+      flex-shrink: 0;
+      padding: 14px 20px;
+      background: transparent;
+      border: none;
+      cursor: none;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--grey);
+      transition: color .2s;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .nav-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 20px; right: 20px;
+      height: 2px;
+      background: var(--acid-yellow);
+      transform: scaleX(0);
+      transition: transform .2s;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .nav-btn.active { color: var(--acid-yellow); }
+    .nav-btn.active::after { transform: scaleX(1); }
+    .nav-btn:hover { color: var(--white); }
+
+    /* ─── MAIN ───────────────────────────── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    /* ─── SECTIONS ───────────────────────── */
+    .section { display: none; animation: fadeUp .3s ease both; }
+    .section.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--purple-neon);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-family: 'Permanent Marker', cursive;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      color: var(--white);
+      margin-bottom: 1.5rem;
+      line-height: 1.1;
+      text-shadow: 3px 3px 0 var(--purple-bright);
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--purple-neon);
+      border-radius: 4px;
+      padding: 2rem;
+      margin-bottom: 1rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .section-card p {
+      font-size: 14px;
+      color: var(--grey);
+      line-height: 1.85;
+    }
+
+    /* num badge */
+    .num-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px; height: 34px;
+      border-radius: 2px;
+      background: var(--acid-yellow);
+      color: var(--purple-deep);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      margin-right: 12px;
+      flex-shrink: 0;
+      clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    }
+
+    .row-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .row-title strong {
+      font-size: 14px;
+      color: var(--white);
+      letter-spacing: 1px;
+    }
+
+    /* materials */
+    .materials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .mat-item {
+      background: rgba(74, 26, 122, 0.45);
+      border: 1px solid var(--purple-mid);
+      border-left: 3px solid var(--purple-neon);
+      border-radius: 2px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      transition: border-color .2s, background .2s;
+      clip-path: polygon(0 0, 100% 0, 97% 100%, 3% 100%);
+    }
+
+    .mat-item:hover {
+      border-color: var(--acid-yellow);
+      background: rgba(74, 26, 122, 0.7);
+    }
+
+    .mat-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--acid-yellow);
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .mat-text {
+      font-size: 12px;
+      color: var(--white);
+      line-height: 1.5;
+    }
+
+    /* diagram image */
+    .diagram-wrap {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #0d0519;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+    }
+
+    .diagram-wrap img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* video */
+    video {
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      margin-top: 1rem;
+      background: #000;
+    }
+
+    /* placeholder video */
+    .ph-video {
+      background: rgba(74, 26, 122, 0.2);
+      border: 2px dashed var(--border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      height: 260px;
+      color: var(--grey);
+      font-size: 11px;
+      letter-spacing: 2px;
+    }
+
+    .ph-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--purple-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ph-icon svg {
+      width: 20px; height: 20px;
+      stroke: var(--purple-neon);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    /* divider */
+    .section-divider {
+      width: 40px;
+      height: 3px;
+      background: var(--acid-yellow);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ─── FOOTER ─────────────────────────── */
+    footer {
+      background: var(--purple-dark);
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 10px;
+      color: var(--grey);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    footer span {
+      color: var(--acid-yellow);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+
+  <!-- ─── HEADER ──────────────────────────────── -->
+  <header>
+    <div class="spray spray-1"></div>
+    <div class="spray spray-2"></div>
+    <div class="spray spray-3"></div>
+    <div class="tape"></div>
+
+    <div class="header-inner">
+      <div class="header-tag">Electrónica · CBTis 144 · 2025</div>
+      <h1>
+        Bienvenidos a la Electrónica
+        <em>— 4. Circuito LED y Potenciómetro</em>
+      </h1>
+      <div class="header-meta">
+        <span>Materia: Inteligencia Artificial</span>
+        <span>Grupo: A</span>
+        <span>Fecha: 2025</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── NAV ─────────────────────────────────── -->
+  <div class="nav-wrap">
+    <nav>
+      <button class="nav-btn active" onclick="show(0,this)">01 · Objetivo</button>
+      <button class="nav-btn" onclick="show(1,this)">02 · Materiales</button>
+      <button class="nav-btn" onclick="show(2,this)">03 · Diagrama</button>
+      <button class="nav-btn" onclick="show(3,this)">04 · Explicación</button>
+      <button class="nav-btn" onclick="show(4,this)">05 · Video</button>
+    </nav>
+  </div>
+
+  <!-- ─── MAIN ─────────────────────────────────── -->
+  <main>
+
+    <!-- 01 Objetivo -->
+    <div class="section active" id="s0">
+      <div class="section-label">// Sección 01</div>
+      <div class="section-title">Objetivo del proyecto</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">1</div>
+          <strong>¿Qué se pretende demostrar?</strong>
+        </div>
+        <p>Analizar y comprender el funcionamiento de un potenciómetro dentro de un circuito eléctrico, utilizándolo para controlar la cantidad de corriente que pasa a través de un LED. A través de esta práctica, se busca observar cómo la variación de la resistencia influye directamente en la intensidad luminosa del LED, permitiendo regular su brillo de manera gradual.</p>
+        <br/>
+        <p>Además, se pretende reforzar conceptos básicos como la <strong style="color:var(--acid-yellow);">polaridad</strong> de los componentes, el uso adecuado de resistencias para proteger dispositivos electrónicos y la correcta conexión en un protoboard, desarrollando habilidades prácticas en el armado de circuitos eléctricos simples.</p>
+      </div>
+    </div>
+
+    <!-- 02 Materiales -->
+    <div class="section" id="s1">
+      <div class="section-label">// Sección 02</div>
+      <div class="section-title">Materiales necesarios</div>
+      <div class="section-divider"></div>
+      <div class="materials-grid">
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">01 · 1 Placa protoboard</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">02 · 1 LED (diodo emisor de luz)</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">03 · 1 Resistencia (220Ω o 330Ω)</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">04 · 1 Batería (9V o 2 pilas AA)</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">05 · Cables o jumpers</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">06 · Porta baterías (recomendado)</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">07 · 1 Potenciómetro (10kΩ)</div></div>
+      </div>
+    </div>
+
+    <!-- 03 Diagrama -->
+    <div class="section" id="s2">
+      <div class="section-label">// Sección 03</div>
+      <div class="section-title">Diagrama Tinkercad</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">3</div>
+          <strong>Conexión del circuito</strong>
+        </div>
+        <div class="diagram-wrap">
+          <img src="circuito4.png" alt="Diagrama circuito LED con potenciómetro en protoboard"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 Explicación -->
+    <div class="section" id="s3">
+      <div class="section-label">// Sección 04</div>
+      <div class="section-title">Explicación del video</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">4</div>
+          <strong>¿Qué muestra el video?</strong>
+        </div>
+        <p>El video muestra el armado del circuito con el potenciómetro conectado en serie con el LED. Se puede observar cómo al girar la perilla del potenciómetro, la resistencia varía y el brillo del LED cambia de forma gradual, demostrando el control de corriente en tiempo real.</p>
+        <video src="video.mp4" controls></video>
+      </div>
+    </div>
+
+    <!-- 05 Video -->
+    <div class="section" id="s4">
+      <div class="section-label">// Sección 05</div>
+      <div class="section-title">Video del circuito terminado</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">5</div>
+          <strong>Circuito en funcionamiento</strong>
+        </div>
+        <div class="ph-video">
+          <div class="ph-icon">
+            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+          <span>VIDEO NO DISPONIBLE</span>
+        </div>
+        <video src="video.mp4" controls></video>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ─── FOOTER ────────────────────────────────── -->
+  <footer>
+    PROYECTO ELECTRÓNICA · CBTis 144 · <span>2025</span>
+  </footer>
+
+  <script>
+    function show(idx, btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('s' + idx).classList.add('active');
+    }
+
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+    });
+    document.querySelectorAll('button').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%,-50%) scale(2.2)');
+      el.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%,-50%) scale(1)');
+    });
+  </script>
+</body>
+</html>
