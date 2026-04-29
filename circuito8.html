@@ -394,6 +394,71 @@
     }
 
     footer span { color: var(--acid-yellow); }
+
+    /* ─── CODE BLOCK ─────────────────────── */
+    .code-wrap {
+      background: #0d0519;
+      border: 1px solid var(--border);
+      border-left: 3px solid #39ff14;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .code-header {
+      background: rgba(57,255,20,0.08);
+      border-bottom: 1px solid rgba(57,255,20,0.15);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #39ff14;
+      text-transform: uppercase;
+    }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dots span:nth-child(1) { background: #ff5f57; }
+    .code-dots span:nth-child(2) { background: #febc2e; }
+    .code-dots span:nth-child(3) { background: #39ff14; }
+    .code-block {
+      padding: 1.6rem 1.8rem;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .code-line { display: flex; gap: 16px; align-items: flex-start; }
+    .line-num {
+      color: rgba(154,138,176,0.4);
+      font-size: 11px;
+      min-width: 22px;
+      text-align: right;
+      user-select: none;
+      padding-top: 1px;
+    }
+    .line-content { flex: 1; }
+    .kw   { color: #c44dff; }
+    .fn   { color: #39ff14; }
+    .num  { color: #d4ff00; }
+    .cmt  { color: #5a4a6e; font-style: italic; }
+    .pun  { color: #9a8ab0; }
+    .str  { color: #ff9f43; }
+    .var  { color: #f0e6ff; }
+    .slit { color: #ff6b6b; }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid rgba(57,255,20,0.3);
+      color: #39ff14;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: none;
+      transition: background .2s, border-color .2s;
+    }
+    .copy-btn:hover { background: rgba(57,255,20,0.1); border-color: #39ff14; }
   </style>
 </head>
 <body>
@@ -429,6 +494,7 @@
       <button class="nav-btn" onclick="show(2,this)">03 · Diagrama</button>
       <button class="nav-btn" onclick="show(3,this)">04 · Explicación</button>
       <button class="nav-btn" onclick="show(4,this)">05 · Video</button>
+      <button class="nav-btn" onclick="show(5,this)">06 · Código</button>
     </nav>
   </div>
 
@@ -517,6 +583,72 @@ Se busca comprender cómo la variación de resistencia permite regular la corrie
       </div>
     </div>
 
+
+    <!-- 06 Código -->
+    <div class="section" id="s5">
+      <div class="section-label">// Sección 06</div>
+      <div class="section-title">Código Arduino</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">6</div>
+          <strong>Sketch — LED RGB controlado por 3 Potenciómetros</strong>
+        </div>
+        <p style="font-size:13px;color:var(--grey);margin-bottom:1.25rem;line-height:1.8;">
+          Se leen las entradas analógicas <strong style="color:var(--acid-yellow)">A0</strong>,
+          <strong style="color:var(--acid-yellow)">A1</strong> y
+          <strong style="color:var(--acid-yellow)">A2</strong> (potenciómetros) y con
+          <code style="color:#39ff14">map()</code> se convierten los valores
+          <strong style="color:var(--acid-yellow)">0–1023</strong> a
+          <strong style="color:var(--acid-yellow)">0–255</strong> para controlar la intensidad
+          PWM de cada canal del LED RGB en los pines
+          <strong style="color:var(--acid-yellow)">9</strong>,
+          <strong style="color:var(--acid-yellow)">10</strong> y
+          <strong style="color:var(--acid-yellow)">11</strong>.
+        </p>
+        <div class="code-wrap" id="codeWrap">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span>rgb_pot.ino · Arduino</span>
+            <button class="copy-btn" id="copyBtn" onclick="copyCode()">&#x2398; Copiar</button>
+          </div>
+          <div class="code-block">
+            <div class="code-line"><span class="line-num">1</span><span class="line-content"><span class="cmt">// Pines de los potenciómetros (Entradas Analógicas)</span></span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">potRojo</span> <span class="pun">=</span> <span class="str">A0</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">potVerde</span> <span class="pun">=</span> <span class="str">A1</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">4</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">potAzul</span> <span class="pun">=</span> <span class="str">A2</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">5</span><span class="line-content"><span class="cmt">// Pines del LED RGB (Salidas PWM)</span></span></div>
+            <div class="code-line"><span class="line-num">6</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">pinRojo</span> <span class="pun">=</span> <span class="num">11</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">7</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">pinVerde</span> <span class="pun">=</span> <span class="num">10</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">8</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">pinAzul</span> <span class="pun">=</span> <span class="num">9</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">9</span><span class="line-content"></span></div>
+            <div class="code-line"><span class="line-num">10</span><span class="line-content"><span class="kw">void</span> <span class="fn">setup</span><span class="pun">() {</span></span></div>
+            <div class="code-line"><span class="line-num">11</span><span class="line-content">&nbsp;&nbsp;<span class="cmt">// Configurar los pines del LED como salida</span></span></div>
+            <div class="code-line"><span class="line-num">12</span><span class="line-content">&nbsp;&nbsp;<span class="fn">pinMode</span><span class="pun">(</span><span class="var">pinRojo</span><span class="pun">,</span> <span class="str">OUTPUT</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">13</span><span class="line-content">&nbsp;&nbsp;<span class="fn">pinMode</span><span class="pun">(</span><span class="var">pinVerde</span><span class="pun">,</span> <span class="str">OUTPUT</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">14</span><span class="line-content">&nbsp;&nbsp;<span class="fn">pinMode</span><span class="pun">(</span><span class="var">pinAzul</span><span class="pun">,</span> <span class="str">OUTPUT</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">15</span><span class="line-content"><span class="pun">}</span></span></div>
+            <div class="code-line"><span class="line-num">16</span><span class="line-content"></span></div>
+            <div class="code-line"><span class="line-num">17</span><span class="line-content"><span class="kw">void</span> <span class="fn">loop</span><span class="pun">() {</span></span></div>
+            <div class="code-line"><span class="line-num">18</span><span class="line-content">&nbsp;&nbsp;<span class="cmt">// 1. Leer el valor de los potenciómetros (0 a 1023)</span></span></div>
+            <div class="code-line"><span class="line-num">19</span><span class="line-content">&nbsp;&nbsp;<span class="kw">int</span> <span class="var">valRojo</span> <span class="pun">=</span> <span class="fn">analogRead</span><span class="pun">(</span><span class="var">potRojo</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">20</span><span class="line-content">&nbsp;&nbsp;<span class="kw">int</span> <span class="var">valVerde</span> <span class="pun">=</span> <span class="fn">analogRead</span><span class="pun">(</span><span class="var">potVerde</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">21</span><span class="line-content">&nbsp;&nbsp;<span class="kw">int</span> <span class="var">valAzul</span> <span class="pun">=</span> <span class="fn">analogRead</span><span class="pun">(</span><span class="var">potAzul</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">22</span><span class="line-content">&nbsp;&nbsp;<span class="cmt">// 2. Mapear los valores de 0-1023 a 0-255 (que es lo que entiende el PWM)</span></span></div>
+            <div class="code-line"><span class="line-num">23</span><span class="line-content">&nbsp;&nbsp;<span class="kw">int</span> <span class="var">brilloRojo</span> <span class="pun">=</span> <span class="fn">map</span><span class="pun">(</span><span class="var">valRojo</span><span class="pun">,</span> <span class="num">0</span><span class="pun">,</span> <span class="num">1023</span><span class="pun">,</span> <span class="num">0</span><span class="pun">,</span> <span class="num">255</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">24</span><span class="line-content">&nbsp;&nbsp;<span class="kw">int</span> <span class="var">brilloVerde</span> <span class="pun">=</span> <span class="fn">map</span><span class="pun">(</span><span class="var">valVerde</span><span class="pun">,</span> <span class="num">0</span><span class="pun">,</span> <span class="num">1023</span><span class="pun">,</span> <span class="num">0</span><span class="pun">,</span> <span class="num">255</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">25</span><span class="line-content">&nbsp;&nbsp;<span class="kw">int</span> <span class="var">brilloAzul</span> <span class="pun">=</span> <span class="fn">map</span><span class="pun">(</span><span class="var">valAzul</span><span class="pun">,</span> <span class="num">0</span><span class="pun">,</span> <span class="num">1023</span><span class="pun">,</span> <span class="num">0</span><span class="pun">,</span> <span class="num">255</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">26</span><span class="line-content">&nbsp;&nbsp;<span class="cmt">// 3. Enviar el brillo al LED RGB</span></span></div>
+            <div class="code-line"><span class="line-num">27</span><span class="line-content">&nbsp;&nbsp;<span class="fn">analogWrite</span><span class="pun">(</span><span class="var">pinRojo</span><span class="pun">,</span> <span class="var">brilloRojo</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">28</span><span class="line-content">&nbsp;&nbsp;<span class="fn">analogWrite</span><span class="pun">(</span><span class="var">pinVerde</span><span class="pun">,</span> <span class="var">brilloVerde</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">29</span><span class="line-content">&nbsp;&nbsp;<span class="fn">analogWrite</span><span class="pun">(</span><span class="var">pinAzul</span><span class="pun">,</span> <span class="var">brilloAzul</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">30</span><span class="line-content">&nbsp;&nbsp;<span class="fn">delay</span><span class="pun">(</span><span class="num">10</span><span class="pun">);</span> <span class="cmt">// Pequeña pausa para suavizar la lectura</span></span></div>
+            <div class="code-line"><span class="line-num">31</span><span class="line-content"><span class="pun">}</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- ─── FOOTER ────────────────────────────────── -->
@@ -525,7 +657,43 @@ Se busca comprender cómo la variación de resistencia permite regular la corrie
   </footer>
 
   <script>
-    function show(idx, btn) {
+    function copyCode() {
+      const raw = `// Pines de los potenciómetros (Entradas Analógicas)
+const int potRojo = A0;
+const int potVerde = A1;
+const int potAzul = A2;
+// Pines del LED RGB (Salidas PWM)
+const int pinRojo = 11;
+const int pinVerde = 10;
+const int pinAzul = 9;
+void setup() {
+  // Configurar los pines del LED como salida
+  pinMode(pinRojo, OUTPUT);
+  pinMode(pinVerde, OUTPUT);
+  pinMode(pinAzul, OUTPUT);
+}
+void loop() {
+  // 1. Leer el valor de los potenciómetros (0 a 1023)
+  int valRojo = analogRead(potRojo);
+  int valVerde = analogRead(potVerde);
+  int valAzul = analogRead(potAzul);
+  // 2. Mapear los valores de 0-1023 a 0-255 (que es lo que entiende el PWM)
+  int brilloRojo = map(valRojo, 0, 1023, 0, 255);
+  int brilloVerde = map(valVerde, 0, 1023, 0, 255);
+  int brilloAzul = map(valAzul, 0, 1023, 0, 255);
+  // 3. Enviar el brillo al LED RGB
+  analogWrite(pinRojo, brilloRojo);
+  analogWrite(pinVerde, brilloVerde);
+  analogWrite(pinAzul, brilloAzul);
+  delay(10); // Pequeña pausa para suavizar la lectura
+}`;
+      navigator.clipboard.writeText(raw).then(() => {
+        const btn = document.getElementById('copyBtn');
+        if (btn) { btn.textContent = '\u2713 Copiado'; setTimeout(() => { btn.innerHTML = '&#x2398; Copiar'; }, 2000); }
+      });
+    }
+
+        function show(idx, btn) {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       btn.classList.add('active');
