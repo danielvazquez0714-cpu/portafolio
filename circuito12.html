@@ -495,6 +495,70 @@
     }
 
     footer span { color: var(--acid-yellow); }
+
+    /* ─── CODE BLOCK ─────────────────────── */
+    .code-wrap {
+      background: #0d0519;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--acid-green);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .code-header {
+      background: rgba(57,255,20,0.08);
+      border-bottom: 1px solid rgba(57,255,20,0.15);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--acid-green);
+      text-transform: uppercase;
+    }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dots span:nth-child(1) { background: #ff5f57; }
+    .code-dots span:nth-child(2) { background: #febc2e; }
+    .code-dots span:nth-child(3) { background: var(--acid-green); }
+    .code-block {
+      padding: 1.6rem 1.8rem;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .code-line { display: flex; gap: 16px; align-items: flex-start; }
+    .line-num {
+      color: rgba(154,138,176,0.4);
+      font-size: 11px;
+      min-width: 26px;
+      text-align: right;
+      user-select: none;
+      padding-top: 1px;
+    }
+    .line-content { flex: 1; }
+    .kw   { color: #c44dff; }
+    .fn   { color: #39ff14; }
+    .num  { color: #d4ff00; }
+    .cmt  { color: #5a4a6e; font-style: italic; }
+    .pun  { color: #9a8ab0; }
+    .str  { color: #ff9f43; }
+    .var  { color: #f0e6ff; }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid rgba(57,255,20,0.3);
+      color: var(--acid-green);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: none;
+      transition: background .2s, border-color .2s;
+    }
+    .copy-btn:hover { background: rgba(57,255,20,0.1); border-color: var(--acid-green); }
   </style>
 </head>
 <body>
@@ -781,6 +845,85 @@ void loop() {
       </div>
     </div>
 
+
+    <!-- 06 Código -->
+    <div class="section" id="s5">
+      <div class="section-label">// Sección 06</div>
+      <div class="section-title">Código Arduino</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">6</div>
+          <strong>Sketch — Semáforo de advertencia con Potenciómetro y Buzzer</strong>
+        </div>
+        <p style="font-size:13px;color:var(--grey);margin-bottom:1.25rem;line-height:1.8;">
+          Se lee el potenciómetro en <strong style="color:var(--acid-yellow)">A0</strong>
+          y según el rango del valor (<strong style="color:var(--acid-yellow)">0–340</strong> /
+          <strong style="color:var(--acid-yellow)">341–681</strong> /
+          <strong style="color:var(--acid-yellow)">682–1023</strong>) se activa el LED
+          <strong style="color:#39ff14">verde</strong>,
+          <strong style="color:#febc2e">amarillo</strong> o
+          <strong style="color:#ff5f57">rojo</strong> junto con el buzzer en nivel crítico.
+        </p>
+        <div class="code-wrap" id="codeWrap">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span>semaforo_pot.ino · Arduino</span>
+            <button class="copy-btn" id="copyBtn" onclick="copyCode()">&#x2398; Copiar</button>
+          </div>
+          <div class="code-block">
+            <div class="code-line"><span class="line-num">1</span><span class="line-content"><span class="cmt">// Pines de los componentes</span></span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">pot</span> <span class="pun">=</span> <span class="str">A0</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">ledVerde</span> <span class="pun">=</span> <span class="num">11</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">4</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">ledAmarillo</span> <span class="pun">=</span> <span class="num">10</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">5</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">ledRojo</span> <span class="pun">=</span> <span class="num">9</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">6</span><span class="line-content"><span class="kw">const</span> <span class="kw">int</span> <span class="var">buzzer</span> <span class="pun">=</span> <span class="num">8</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">7</span><span class="line-content"></span></div>
+            <div class="code-line"><span class="line-num">8</span><span class="line-content"><span class="kw">void</span> <span class="fn">setup</span><span class="pun">() {</span></span></div>
+            <div class="code-line"><span class="line-num">9</span><span class="line-content">&nbsp;&nbsp;<span class="cmt">// Configurar pines de salida</span></span></div>
+            <div class="code-line"><span class="line-num">10</span><span class="line-content">&nbsp;&nbsp;<span class="fn">pinMode</span><span class="pun">(</span><span class="var">ledVerde</span><span class="pun">,</span> <span class="str">OUTPUT</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">11</span><span class="line-content">&nbsp;&nbsp;<span class="fn">pinMode</span><span class="pun">(</span><span class="var">ledAmarillo</span><span class="pun">,</span> <span class="str">OUTPUT</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">12</span><span class="line-content">&nbsp;&nbsp;<span class="fn">pinMode</span><span class="pun">(</span><span class="var">ledRojo</span><span class="pun">,</span> <span class="str">OUTPUT</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">13</span><span class="line-content">&nbsp;&nbsp;<span class="fn">pinMode</span><span class="pun">(</span><span class="var">buzzer</span><span class="pun">,</span> <span class="str">OUTPUT</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">14</span><span class="line-content"></span></div>
+            <div class="code-line"><span class="line-num">15</span><span class="line-content">&nbsp;&nbsp;<span class="cmt">// Iniciar monitor serie para ver los valores</span></span></div>
+            <div class="code-line"><span class="line-num">16</span><span class="line-content">&nbsp;&nbsp;<span class="fn">Serial</span><span class="pun">.</span><span class="fn">begin</span><span class="pun">(</span><span class="num">9600</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">17</span><span class="line-content"><span class="pun">}</span></span></div>
+            <div class="code-line"><span class="line-num">18</span><span class="line-content"></span></div>
+            <div class="code-line"><span class="line-num">19</span><span class="line-content"><span class="kw">void</span> <span class="fn">loop</span><span class="pun">() {</span></span></div>
+            <div class="code-line"><span class="line-num">20</span><span class="line-content">&nbsp;&nbsp;<span class="cmt">// Leer el valor del potenciómetro (0 a 1023)</span></span></div>
+            <div class="code-line"><span class="line-num">21</span><span class="line-content">&nbsp;&nbsp;<span class="kw">int</span> <span class="var">lectura</span> <span class="pun">=</span> <span class="fn">analogRead</span><span class="pun">(</span><span class="var">pot</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">22</span><span class="line-content">&nbsp;&nbsp;<span class="fn">Serial</span><span class="pun">.</span><span class="fn">println</span><span class="pun">(</span><span class="var">lectura</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">23</span><span class="line-content">&nbsp;&nbsp;<span class="cmt">// Lógica de control (estilo semáforo de advertencia)</span></span></div>
+            <div class="code-line"><span class="line-num">24</span><span class="line-content"></span></div>
+            <div class="code-line"><span class="line-num">25</span><span class="line-content">&nbsp;&nbsp;<span class="kw">if</span> <span class="pun">(</span><span class="var">lectura</span> <span class="pun"><</span> <span class="num">341</span><span class="pun">)</span> <span class="pun">{</span></span></div>
+            <div class="code-line"><span class="line-num">26</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmt">// NIVEL BAJO: Solo verde</span></span></div>
+            <div class="code-line"><span class="line-num">27</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledVerde</span><span class="pun">,</span> <span class="str">HIGH</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">28</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledAmarillo</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">29</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledRojo</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">30</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">buzzer</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">31</span><span class="line-content">&nbsp;&nbsp;<span class="pun">}</span></span></div>
+            <div class="code-line"><span class="line-num">32</span><span class="line-content">&nbsp;&nbsp;<span class="kw">else</span> <span class="kw">if</span> <span class="pun">(</span><span class="var">lectura</span> <span class="pun">>=</span> <span class="num">341</span> <span class="pun">&&</span> <span class="var">lectura</span> <span class="pun"><</span> <span class="num">682</span><span class="pun">)</span> <span class="pun">{</span></span></div>
+            <div class="code-line"><span class="line-num">33</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmt">// NIVEL MEDIO: Solo amarillo</span></span></div>
+            <div class="code-line"><span class="line-num">34</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledVerde</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">35</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledAmarillo</span><span class="pun">,</span> <span class="str">HIGH</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">36</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledRojo</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">37</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">buzzer</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">38</span><span class="line-content">&nbsp;&nbsp;<span class="pun">}</span></span></div>
+            <div class="code-line"><span class="line-num">39</span><span class="line-content">&nbsp;&nbsp;<span class="kw">else</span> <span class="pun">{</span></span></div>
+            <div class="code-line"><span class="line-num">40</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmt">// NIVEL CRÍTICO: Rojo y Buzzer</span></span></div>
+            <div class="code-line"><span class="line-num">41</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledVerde</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">42</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledAmarillo</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">43</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">ledRojo</span><span class="pun">,</span> <span class="str">HIGH</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">44</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">buzzer</span><span class="pun">,</span> <span class="str">HIGH</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">45</span><span class="line-content">&nbsp;&nbsp;<span class="pun">}</span></span></div>
+            <div class="code-line"><span class="line-num">46</span><span class="line-content">&nbsp;&nbsp;<span class="fn">delay</span><span class="pun">(</span><span class="num">50</span><span class="pun">);</span> <span class="cmt">// Estabilidad en la lectura</span></span></div>
+            <div class="code-line"><span class="line-num">47</span><span class="line-content"><span class="pun">}</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- ─── FOOTER ────────────────────────────────── -->
@@ -789,7 +932,59 @@ void loop() {
   </footer>
 
   <script>
-    function show(idx, btn) {
+    function copyCode() {
+      const raw = `// Pines de los componentes
+const int pot = A0;
+const int ledVerde = 11;
+const int ledAmarillo = 10;
+const int ledRojo = 9;
+const int buzzer = 8;
+void setup() {
+  // Configurar pines de salida
+  pinMode(ledVerde, OUTPUT);
+  pinMode(ledAmarillo, OUTPUT);
+  pinMode(ledRojo, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  
+  // Iniciar monitor serie para ver los valores
+  Serial.begin(9600);
+}
+void loop() {
+  // Leer el valor del potenciómetro (0 a 1023)
+  int lectura = analogRead(pot);
+  Serial.println(lectura);
+  // Lógica de control (estilo semáforo de advertencia)
+  
+  if (lectura < 341) { 
+    // NIVEL BAJO: Solo verde
+    digitalWrite(ledVerde, HIGH);
+    digitalWrite(ledAmarillo, LOW);
+    digitalWrite(ledRojo, LOW);
+    digitalWrite(buzzer, LOW);
+  } 
+  else if (lectura >= 341 && lectura < 682) {
+    // NIVEL MEDIO: Solo amarillo
+    digitalWrite(ledVerde, LOW);
+    digitalWrite(ledAmarillo, HIGH);
+    digitalWrite(ledRojo, LOW);
+    digitalWrite(buzzer, LOW);
+  } 
+  else {
+    // NIVEL CRÍTICO: Rojo y Buzzer
+    digitalWrite(ledVerde, LOW);
+    digitalWrite(ledAmarillo, LOW);
+    digitalWrite(ledRojo, HIGH);
+    digitalWrite(buzzer, HIGH);
+  }
+  delay(50); // Estabilidad en la lectura
+}`;
+      navigator.clipboard.writeText(raw).then(() => {
+        const btn = document.getElementById('copyBtn');
+        if (btn) { btn.textContent = '\u2713 Copiado'; setTimeout(() => { btn.innerHTML = '&#x2398; Copiar'; }, 2000); }
+      });
+    }
+
+        function show(idx, btn) {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       btn.classList.add('active');
