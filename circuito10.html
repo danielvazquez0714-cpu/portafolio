@@ -404,6 +404,70 @@
     }
 
     footer span { color: var(--acid-yellow); }
+
+    /* ─── CODE BLOCK ─────────────────────── */
+    .code-wrap {
+      background: #0d0519;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--acid-green);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .code-header {
+      background: rgba(57,255,20,0.08);
+      border-bottom: 1px solid rgba(57,255,20,0.15);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--acid-green);
+      text-transform: uppercase;
+    }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dots span:nth-child(1) { background: #ff5f57; }
+    .code-dots span:nth-child(2) { background: #febc2e; }
+    .code-dots span:nth-child(3) { background: var(--acid-green); }
+    .code-block {
+      padding: 1.6rem 1.8rem;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .code-line { display: flex; gap: 16px; align-items: flex-start; }
+    .line-num {
+      color: rgba(154,138,176,0.4);
+      font-size: 11px;
+      min-width: 22px;
+      text-align: right;
+      user-select: none;
+      padding-top: 1px;
+    }
+    .line-content { flex: 1; }
+    .kw   { color: #c44dff; }
+    .fn   { color: #39ff14; }
+    .num  { color: #d4ff00; }
+    .cmt  { color: #5a4a6e; font-style: italic; }
+    .pun  { color: #9a8ab0; }
+    .str  { color: #ff9f43; }
+    .var  { color: #f0e6ff; }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid rgba(57,255,20,0.3);
+      color: var(--acid-green);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: none;
+      transition: background .2s, border-color .2s;
+    }
+    .copy-btn:hover { background: rgba(57,255,20,0.1); border-color: var(--acid-green); }
   </style>
 </head>
 <body>
@@ -439,6 +503,7 @@
       <button class="nav-btn" onclick="show(2,this)">03 · Diagrama</button>
       <button class="nav-btn" onclick="show(3,this)">04 · Explicación</button>
       <button class="nav-btn" onclick="show(4,this)">05 · Video</button>
+      <button class="nav-btn" onclick="show(5,this)">06 · Código</button>
     </nav>
   </div>
 
@@ -535,6 +600,52 @@ Se busca simular un sistema real (como el de un museo), donde las luces se encie
       </div>
     </div>
 
+
+    <!-- 06 Código -->
+    <div class="section" id="s5">
+      <div class="section-label">// Sección 06</div>
+      <div class="section-title">Código Arduino</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">6</div>
+          <strong>Sketch — LED controlado por Fotorresistencia (LDR)</strong>
+        </div>
+        <p style="font-size:13px;color:var(--grey);margin-bottom:1.25rem;line-height:1.8;">
+          Se lee la entrada analógica <strong style="color:var(--acid-yellow)">A0</strong> (LDR)
+          y se compara con el umbral <strong style="color:var(--acid-yellow)">500</strong>.
+          Si el valor es menor (ambiente oscuro) el LED del pin
+          <strong style="color:var(--acid-yellow)">13</strong> se enciende;
+          si hay luz suficiente, se apaga automáticamente.
+        </p>
+        <div class="code-wrap" id="codeWrap">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span>ldr_led.ino · Arduino</span>
+            <button class="copy-btn" id="copyBtn" onclick="copyCode()">&#x2398; Copiar</button>
+          </div>
+          <div class="code-block">
+            <div class="code-line"><span class="line-num">1</span><span class="line-content"><span class="kw">int</span> <span class="var">leds</span> <span class="pun">=</span> <span class="num">13</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="line-content"><span class="kw">int</span> <span class="var">sensor</span> <span class="pun">=</span> <span class="str">A0</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="line-content"><span class="kw">int</span> <span class="var">valor</span> <span class="pun">=</span> <span class="num">0</span><span class="pun">;</span></span></div>
+            <div class="code-line"><span class="line-num">4</span><span class="line-content"></span></div>
+            <div class="code-line"><span class="line-num">5</span><span class="line-content"><span class="kw">void</span> <span class="fn">setup</span><span class="pun">() {</span></span></div>
+            <div class="code-line"><span class="line-num">6</span><span class="line-content">&nbsp;&nbsp;<span class="fn">pinMode</span><span class="pun">(</span><span class="var">leds</span><span class="pun">,</span> <span class="str">OUTPUT</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">7</span><span class="line-content"><span class="pun">}</span></span></div>
+            <div class="code-line"><span class="line-num">8</span><span class="line-content"></span></div>
+            <div class="code-line"><span class="line-num">9</span><span class="line-content"><span class="kw">void</span> <span class="fn">loop</span><span class="pun">() {</span></span></div>
+            <div class="code-line"><span class="line-num">10</span><span class="line-content">&nbsp;&nbsp;<span class="var">valor</span> <span class="pun">=</span> <span class="fn">analogRead</span><span class="pun">(</span><span class="var">sensor</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">11</span><span class="line-content">&nbsp;&nbsp;<span class="kw">if</span> <span class="pun">(</span><span class="var">valor</span> <span class="pun"><</span> <span class="num">500</span><span class="pun">)</span> <span class="pun">{</span> <span class="cmt">// oscuro</span></span></div>
+            <div class="code-line"><span class="line-num">12</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">leds</span><span class="pun">,</span> <span class="str">HIGH</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">13</span><span class="line-content">&nbsp;&nbsp;<span class="pun">}</span> <span class="kw">else</span> <span class="pun">{</span> <span class="cmt">// luz</span></span></div>
+            <div class="code-line"><span class="line-num">14</span><span class="line-content">&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span><span class="pun">(</span><span class="var">leds</span><span class="pun">,</span> <span class="str">LOW</span><span class="pun">);</span></span></div>
+            <div class="code-line"><span class="line-num">15</span><span class="line-content">&nbsp;&nbsp;<span class="pun">}</span></span></div>
+            <div class="code-line"><span class="line-num">16</span><span class="line-content"><span class="pun">}</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- ─── FOOTER ────────────────────────────────── -->
@@ -543,7 +654,28 @@ Se busca simular un sistema real (como el de un museo), donde las luces se encie
   </footer>
 
   <script>
-    function show(idx, btn) {
+    function copyCode() {
+      const raw = `int leds = 13;
+int sensor = A0;
+int valor = 0;
+void setup() {
+  pinMode(leds, OUTPUT);
+}
+void loop() {
+  valor = analogRead(sensor);
+  if (valor < 500) { // oscuro
+    digitalWrite(leds, HIGH);
+  } else { // luz
+    digitalWrite(leds, LOW);
+  }
+}`;
+      navigator.clipboard.writeText(raw).then(() => {
+        const btn = document.getElementById('copyBtn');
+        if (btn) { btn.textContent = '\u2713 Copiado'; setTimeout(() => { btn.innerHTML = '&#x2398; Copiar'; }, 2000); }
+      });
+    }
+
+        function show(idx, btn) {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       btn.classList.add('active');
