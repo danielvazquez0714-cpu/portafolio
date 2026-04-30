@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Conceptos Básicos · Arduino</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --purple-deep:   #1a0a2e;
+      --purple-dark:   #2d0f4e;
+      --purple-mid:    #4a1a7a;
+      --purple-bright: #8b2fc9;
+      --purple-neon:   #c44dff;
+      --acid-yellow:   #d4ff00;
+      --acid-green:    #39ff14;
+      --white:         #f0e6ff;
+      --grey:          #9a8ab0;
+      --surface:       rgba(45,15,78,0.6);
+      --border:        rgba(196,77,255,0.2);
+      --mono:    'Space Mono', monospace;
+      --display: 'Bebas Neue', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--purple-deep);
+      color: var(--white);
+      font-family: var(--mono);
+      overflow-x: hidden;
+      cursor: none;
+      min-height: 100vh;
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 14px; height: 14px;
+      background: var(--acid-yellow);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    /* ─── SPRAY DECOS ─────────────────────── */
+    .spray {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .spray-1 { width: 500px; height: 500px; background: var(--purple-bright); top: -100px; right: -120px; opacity: 0.3; }
+    .spray-2 { width: 350px; height: 350px; background: var(--purple-neon);   bottom: 50px; left: -80px;   opacity: 0.15; }
+    .spray-3 { width: 200px; height: 200px; background: var(--acid-yellow);   top: 60%; left: 60%;          opacity: 0.07; }
+
+    /* Tape line */
+    .tape {
+      position: absolute;
+      width: 120%; height: 6px;
+      background: var(--acid-yellow);
+      top: 35%; left: -10%;
+      transform: rotate(-2deg);
+      opacity: 0.4; z-index: 0;
+    }
+
+    /* ─── HEADER ─────────────────────────── */
+    header {
+      position: relative;
+      padding: 3rem 5vw 2.5rem;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .header-tag {
+      display: inline-block;
+      background: var(--acid-yellow);
+      color: var(--purple-deep);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.35rem 1.1rem;
+      margin-bottom: 1.2rem;
+      clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    }
+
+    header h1 {
+      font-family: 'Permanent Marker', cursive;
+      font-size: clamp(2rem, 5.5vw, 4rem);
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+      text-shadow: 4px 4px 0 var(--purple-bright), 8px 8px 0 var(--purple-deep);
+    }
+
+    header h1 em {
+      font-style: normal;
+      color: var(--acid-yellow);
+      display: block;
+    }
+
+    .header-meta {
+      font-size: 11px;
+      color: var(--grey);
+      margin-top: 1.2rem;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .header-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-meta span::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--purple-neon);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+
+    /* ─── NAV ────────────────────────────── */
+    .nav-wrap {
+      background: var(--purple-dark);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+
+    .nav-btn {
+      flex-shrink: 0;
+      padding: 14px 20px;
+      background: transparent;
+      border: none;
+      cursor: none;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--grey);
+      transition: color .2s;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .nav-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 20px; right: 20px;
+      height: 2px;
+      background: var(--acid-yellow);
+      transform: scaleX(0);
+      transition: transform .2s;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .nav-btn.active        { color: var(--acid-yellow); }
+    .nav-btn.active::after { transform: scaleX(1); }
+    .nav-btn:hover         { color: var(--white); }
+
+    /* ─── MAIN ───────────────────────────── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    /* ─── SECTIONS ───────────────────────── */
+    .section { display: none; animation: fadeUp .3s ease both; }
+    .section.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--purple-neon);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-family: 'Permanent Marker', cursive;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      color: var(--white);
+      margin-bottom: 1.5rem;
+      line-height: 1.1;
+      text-shadow: 3px 3px 0 var(--purple-bright);
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--purple-neon);
+      border-radius: 4px;
+      padding: 2rem;
+      margin-bottom: 1rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .section-card p {
+      font-size: 14px;
+      color: var(--grey);
+      line-height: 1.85;
+    }
+
+    /* num badge */
+    .num-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px; height: 34px;
+      border-radius: 2px;
+      background: var(--acid-yellow);
+      color: var(--purple-deep);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      margin-right: 12px;
+      flex-shrink: 0;
+      clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    }
+
+    .row-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    /* divider */
+    .section-divider {
+      width: 40px;
+      height: 3px;
+      background: var(--acid-yellow);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ─── MATERIALS / CARDS GRID ─────────── */
+    .materials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .mat-item {
+      background: rgba(74,26,122,0.4);
+      border: 1px solid var(--purple-mid);
+      border-left: 3px solid var(--purple-neon);
+      border-radius: 2px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      transition: border-color .2s, background .2s;
+      clip-path: polygon(0 0, 100% 0, 97% 100%, 3% 100%);
+    }
+
+    .mat-item:hover {
+      border-color: var(--acid-yellow);
+      background: rgba(74,26,122,0.7);
+    }
+
+    .mat-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--acid-yellow);
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .mat-text {
+      font-size: 12px;
+      color: var(--white);
+      line-height: 1.5;
+    }
+
+    /* ─── INFO BOX ───────────────────────── */
+    .info-box {
+      background: rgba(196,77,255,0.07);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--acid-yellow);
+      border-radius: 2px;
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      font-size: 13px;
+      color: var(--grey);
+      line-height: 1.8;
+    }
+
+    .info-box strong {
+      color: var(--acid-yellow);
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ─── TABLE ──────────────────────────── */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 13px;
+    }
+
+    .comparison-table th {
+      background: var(--purple-mid);
+      color: var(--acid-yellow);
+      padding: 10px 14px;
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--purple-neon);
+    }
+
+    .comparison-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--grey);
+      line-height: 1.6;
+    }
+
+    .comparison-table td strong {
+      color: var(--white);
+    }
+
+    .comparison-table tr:hover td {
+      background: rgba(196,77,255,0.05);
+    }
+
+    /* ─── CODE EDITOR ────────────────────── */
+    .code-wrap {
+      background: #0d0519;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .code-topbar {
+      background: var(--purple-dark);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .code-dots { display: flex; gap: 6px; }
+    .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: var(--acid-yellow); }
+    .dot-g { background: var(--acid-green); }
+
+    .code-filename {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--grey);
+      letter-spacing: 1px;
+    }
+
+    .code-area {
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-area pre {
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--white);
+      white-space: pre;
+      margin: 0;
+    }
+
+    .code-comment  { color: #6a9955; }
+    .code-keyword  { color: #569cd6; }
+    .code-function { color: #dcdcaa; }
+    .code-number   { color: #b5cea8; }
+    .code-string   { color: #ce9178; }
+
+    .code-footer {
+      background: var(--purple-dark);
+      border-top: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--grey);
+      letter-spacing: 1px;
+    }
+
+    .lang-badge {
+      background: rgba(196,77,255,0.12);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 2px 8px;
+      color: var(--purple-neon);
+      font-size: 10px;
+      font-family: var(--mono);
+      clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    }
+
+    /* sub-heading inside sections */
+    .sub-heading {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--acid-yellow);
+      margin: 1.8rem 0 0.6rem;
+    }
+
+    /* ─── FOOTER ─────────────────────────── */
+    footer {
+      background: var(--purple-dark);
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 10px;
+      color: var(--grey);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    footer span { color: var(--acid-yellow); }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+
+  <!-- ─── HEADER ──────────────────────────────── -->
+  <header>
+    <div class="spray spray-1"></div>
+    <div class="spray spray-2"></div>
+    <div class="spray spray-3"></div>
+    <div class="tape"></div>
+
+    <div class="header-inner">
+      <div class="header-tag">Electrónica · CBTis 144 · 2025</div>
+      <h1>
+        Bienvenidos a la Electrónica
+        <em>— Conceptos Básicos de Arduino</em>
+      </h1>
+      <div class="header-meta">
+        <span>Materia: Inteligencia Artificial</span>
+        <span>Grupo: A</span>
+        <span>Fecha: 2025</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── NAV ─────────────────────────────────── -->
+  <div class="nav-wrap">
+    <nav>
+      <button class="nav-btn active" onclick="show(0,this)">01 · ¿Qué es Arduino?</button>
+      <button class="nav-btn" onclick="show(1,this)">02 · Componentes</button>
+      <button class="nav-btn" onclick="show(2,this)">03 · Estructura</button>
+      <button class="nav-btn" onclick="show(3,this)">04 · Pines y Funciones</button>
+      <button class="nav-btn" onclick="show(4,this)">05 · Ejemplo Blink</button>
+      <button class="nav-btn" onclick="show(5,this)">06 · Variables y Tips</button>
+    </nav>
+  </div>
+
+  <!-- ─── MAIN ─────────────────────────────────── -->
+  <main>
+
+    <!-- 01 ¿Qué es Arduino? -->
+    <div class="section active" id="s0">
+      <div class="section-label">// Sección 01</div>
+      <div class="section-title">¿Qué es Arduino?</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">1</div>
+          <strong>Plataforma de hardware y software abierto</strong>
+        </div>
+        <p>Arduino es una plataforma de hardware y software de código abierto que facilita la creación de proyectos electrónicos interactivos. Fue diseñada para ser accesible tanto a principiantes como a profesionales.</p>
+        <br>
+        <p>Permite conectar sensores, actuadores y otros componentes electrónicos al mundo físico mediante una programación sencilla basada en C/C++.</p>
+      </div>
+      <div class="materials-grid" style="margin-top:1rem;">
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Plataforma de prototipos electrónicos</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Fácil de usar para principiantes</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Ideal para proyectos de IoT</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Gran comunidad de apoyo</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Hardware y software de código abierto</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Compatible con cientos de librerías</div></div>
+      </div>
+    </div>
+
+    <!-- 02 Componentes -->
+    <div class="section" id="s1">
+      <div class="section-label">// Sección 02</div>
+      <div class="section-title">Componentes Principales</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">2</div>
+          <strong>Partes esenciales de la placa Arduino UNO</strong>
+        </div>
+        <p>Conoce las partes clave que componen una placa Arduino y su función dentro del sistema:</p>
+      </div>
+      <div class="materials-grid" style="margin-top:1rem;">
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Microcontrolador ATmega328P</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Pines digitales (0–13)</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Pines analógicos (A0–A5)</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Puerto USB para programación</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Alimentación 5V / 3.3V</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">LED integrado en pin 13</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Botón de reset</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">Pines PWM (~3, ~5, ~6, ~9, ~10, ~11)</div></div>
+      </div>
+      <div class="section-card" style="margin-top:1rem;">
+        <div class="row-title">
+          <div class="num-badge">IDE</div>
+          <strong>Entorno de Programación (Arduino IDE)</strong>
+        </div>
+        <p>El IDE de Arduino es el software usado para escribir y cargar programas (sketches) a la placa. Incluye editor de código, compilador integrado, monitor serial para depuración, librería de ejemplos y gestor de librerías externas.</p>
+      </div>
+    </div>
+
+    <!-- 03 Estructura -->
+    <div class="section" id="s2">
+      <div class="section-label">// Sección 03</div>
+      <div class="section-title">Estructura de un Programa</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">3</div>
+          <strong>Las dos funciones obligatorias</strong>
+        </div>
+        <p>Todo programa de Arduino se compone de dos funciones principales que son obligatorias. La función <code style="color:var(--acid-yellow)">setup()</code> se ejecuta una sola vez al iniciar, mientras que <code style="color:var(--acid-yellow)">loop()</code> se ejecuta continuamente.</p>
+      </div>
+      <div class="info-box">
+        <strong>📌 Nota Importante</strong>
+        Estas dos funciones son el corazón de cualquier sketch de Arduino. Sin ellas el programa no compilará.
+      </div>
+      <div class="code-wrap">
+        <div class="code-topbar">
+          <div class="code-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <div class="code-filename">estructura.ino</div>
+          <span class="lang-badge">Arduino / C++</span>
+        </div>
+        <div class="code-area">
+          <pre><span class="code-comment">// Función setup: Se ejecuta una vez al inicio</span>
+<span class="code-keyword">void</span> <span class="code-function">setup</span>() {
+  <span class="code-comment">// Configuración de pines y variables iniciales</span>
+  <span class="code-function">pinMode</span>(<span class="code-number">13</span>, OUTPUT);  <span class="code-comment">// Configura el pin 13 como salida</span>
+  <span class="code-function">Serial.begin</span>(<span class="code-number">9600</span>);       <span class="code-comment">// Inicia comunicación serial</span>
+}
+
+<span class="code-comment">// Función loop: Se ejecuta continuamente</span>
+<span class="code-keyword">void</span> <span class="code-function">loop</span>() {
+  <span class="code-comment">// Código que se repite infinitamente</span>
+  <span class="code-function">digitalWrite</span>(<span class="code-number">13</span>, HIGH);  <span class="code-comment">// Enciende el LED</span>
+  <span class="code-function">delay</span>(<span class="code-number">1000</span>);              <span class="code-comment">// Espera 1 segundo</span>
+  <span class="code-function">digitalWrite</span>(<span class="code-number">13</span>, LOW);   <span class="code-comment">// Apaga el LED</span>
+  <span class="code-function">delay</span>(<span class="code-number">1000</span>);              <span class="code-comment">// Espera 1 segundo</span>
+}</pre>
+        </div>
+        <div class="code-footer">
+          <span class="lang-badge">Arduino / C++</span>
+          <span>· Estructura básica de cualquier sketch</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 Pines y Funciones -->
+    <div class="section" id="s3">
+      <div class="section-label">// Sección 04</div>
+      <div class="section-title">Pines y Funciones Básicas</div>
+      <div class="section-divider"></div>
+
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">4</div>
+          <strong>Tipos de pines disponibles</strong>
+        </div>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Tipo de Pin</th>
+              <th>Función</th>
+              <th>Valores</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Digitales</strong></td>
+              <td>Entrada/Salida digital (ON/OFF)</td>
+              <td>HIGH (5V) o LOW (0V)</td>
+            </tr>
+            <tr>
+              <td><strong>Analógicos</strong></td>
+              <td>Lectura de valores variables</td>
+              <td>0 a 1023 (0V a 5V)</td>
+            </tr>
+            <tr>
+              <td><strong>PWM (~)</strong></td>
+              <td>Salida analógica simulada</td>
+              <td>0 a 255 (0% a 100%)</td>
+            </tr>
+            <tr>
+              <td><strong>Alimentación</strong></td>
+              <td>Suministro de energía</td>
+              <td>5V, 3.3V, GND</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">// Entrada / Salida Digital</div>
+      <div class="code-wrap">
+        <div class="code-topbar">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="code-filename">digital.ino</div>
+          <span class="lang-badge">Arduino / C++</span>
+        </div>
+        <div class="code-area">
+          <pre><span class="code-comment">// Configurar modo del pin</span>
+<span class="code-function">pinMode</span>(pin, MODE);  <span class="code-comment">// MODE puede ser INPUT, OUTPUT o INPUT_PULLUP</span>
+
+<span class="code-comment">// Escribir valor digital</span>
+<span class="code-function">digitalWrite</span>(pin, VALUE);  <span class="code-comment">// VALUE: HIGH o LOW</span>
+
+<span class="code-comment">// Leer valor digital</span>
+<span class="code-keyword">int</span> valor = <span class="code-function">digitalRead</span>(pin);  <span class="code-comment">// Retorna HIGH o LOW</span></pre>
+        </div>
+      </div>
+
+      <div class="sub-heading">// Entrada / Salida Analógica</div>
+      <div class="code-wrap">
+        <div class="code-topbar">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="code-filename">analogico.ino</div>
+          <span class="lang-badge">Arduino / C++</span>
+        </div>
+        <div class="code-area">
+          <pre><span class="code-comment">// Leer valor analógico (0-1023)</span>
+<span class="code-keyword">int</span> valor = <span class="code-function">analogRead</span>(pin);
+
+<span class="code-comment">// Escribir valor PWM (0-255)</span>
+<span class="code-function">analogWrite</span>(pin, valor);  <span class="code-comment">// Solo en pines PWM (~)</span></pre>
+        </div>
+      </div>
+
+      <div class="sub-heading">// Control de Tiempo y Serial</div>
+      <div class="code-wrap">
+        <div class="code-topbar">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="code-filename">tiempo_serial.ino</div>
+          <span class="lang-badge">Arduino / C++</span>
+        </div>
+        <div class="code-area">
+          <pre><span class="code-comment">// Pausar ejecución en milisegundos</span>
+<span class="code-function">delay</span>(<span class="code-number">1000</span>);  <span class="code-comment">// Pausa de 1 segundo</span>
+
+<span class="code-comment">// Obtener tiempo transcurrido</span>
+<span class="code-keyword">unsigned long</span> tiempo = <span class="code-function">millis</span>();  <span class="code-comment">// Milisegundos desde el inicio</span>
+
+<span class="code-comment">// Iniciar comunicación serial</span>
+<span class="code-function">Serial.begin</span>(<span class="code-number">9600</span>);  <span class="code-comment">// Velocidad en baudios</span>
+
+<span class="code-comment">// Enviar datos</span>
+<span class="code-function">Serial.print</span>(<span class="code-string">"Hola"</span>);      <span class="code-comment">// Sin salto de línea</span>
+<span class="code-function">Serial.println</span>(<span class="code-string">"Mundo"</span>);   <span class="code-comment">// Con salto de línea</span>
+
+<span class="code-comment">// Leer datos disponibles</span>
+<span class="code-keyword">if</span> (<span class="code-function">Serial.available</span>() > <span class="code-number">0</span>) {
+  <span class="code-keyword">char</span> dato = <span class="code-function">Serial.read</span>();
+}</pre>
+        </div>
+        <div class="code-footer">
+          <span class="lang-badge">Arduino / C++</span>
+          <span>· Funciones esenciales del lenguaje</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 Ejemplo Blink -->
+    <div class="section" id="s4">
+      <div class="section-label">// Sección 05</div>
+      <div class="section-title">Proyecto Ejemplo: Blink LED</div>
+      <div class="section-divider"></div>
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">5</div>
+          <strong>El "Hola Mundo" de Arduino</strong>
+        </div>
+        <p>Hacer parpadear un LED es el primer proyecto que todo estudiante de Arduino realiza. Enseña los conceptos fundamentales de salidas digitales y control de tiempo.</p>
+      </div>
+      <div class="info-box">
+        <strong>🎯 Objetivo</strong>
+        Hacer que un LED conectado al pin 13 parpadee cada segundo, alternando entre encendido y apagado.
+      </div>
+      <div class="code-wrap">
+        <div class="code-topbar">
+          <div class="code-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <div class="code-filename">blink.ino</div>
+          <span class="lang-badge">Arduino / C++</span>
+        </div>
+        <div class="code-area">
+          <pre><span class="code-comment">// Definimos el pin del LED</span>
+<span class="code-keyword">const int</span> ledPin = <span class="code-number">13</span>;
+
+<span class="code-keyword">void</span> <span class="code-function">setup</span>() {
+  <span class="code-comment">// Configuramos el pin como salida</span>
+  <span class="code-function">pinMode</span>(ledPin, OUTPUT);
+}
+
+<span class="code-keyword">void</span> <span class="code-function">loop</span>() {
+  <span class="code-comment">// Encendemos el LED</span>
+  <span class="code-function">digitalWrite</span>(ledPin, HIGH);
+  <span class="code-function">delay</span>(<span class="code-number">1000</span>);  <span class="code-comment">// Esperamos 1 segundo</span>
+
+  <span class="code-comment">// Apagamos el LED</span>
+  <span class="code-function">digitalWrite</span>(ledPin, LOW);
+  <span class="code-function">delay</span>(<span class="code-number">1000</span>);  <span class="code-comment">// Esperamos 1 segundo</span>
+}</pre>
+        </div>
+        <div class="code-footer">
+          <span class="lang-badge">Arduino / C++</span>
+          <span>· Proyecto Blink — el más básico y fundamental</span>
+        </div>
+      </div>
+      <div class="info-box">
+        <strong>💡 Explicación</strong>
+        Este programa hace que el LED integrado en el pin 13 se encienda durante un segundo y se apague durante otro segundo, repitiéndose continuamente. Es el punto de partida perfecto para comenzar con Arduino.
+      </div>
+    </div>
+
+    <!-- 06 Variables y Tips -->
+    <div class="section" id="s5">
+      <div class="section-label">// Sección 06</div>
+      <div class="section-title">Variables y Consejos</div>
+      <div class="section-divider"></div>
+
+      <div class="section-card">
+        <div class="row-title">
+          <div class="num-badge">6</div>
+          <strong>Tipos de datos en Arduino / C++</strong>
+        </div>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Tipo de Dato</th>
+              <th>Descripción</th>
+              <th>Ejemplo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>int</strong></td>
+              <td>Número entero (−32,768 a 32,767)</td>
+              <td>int edad = 25;</td>
+            </tr>
+            <tr>
+              <td><strong>float</strong></td>
+              <td>Número decimal</td>
+              <td>float temp = 23.5;</td>
+            </tr>
+            <tr>
+              <td><strong>boolean</strong></td>
+              <td>Verdadero o falso</td>
+              <td>boolean on = true;</td>
+            </tr>
+            <tr>
+              <td><strong>char</strong></td>
+              <td>Un solo carácter</td>
+              <td>char letra = 'A';</td>
+            </tr>
+            <tr>
+              <td><strong>String</strong></td>
+              <td>Cadena de texto</td>
+              <td>String nombre = "Arduino";</td>
+            </tr>
+            <tr>
+              <td><strong>long</strong></td>
+              <td>Entero largo (hasta 2,147M)</td>
+              <td>long dur = 123456;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">// Consejos para Principiantes</div>
+      <div class="materials-grid" style="margin-top:0.5rem;">
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">📖 Comienza con proyectos simples como Blink antes de pasar a proyectos más complejos</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">🔍 Usa el Monitor Serial para depurar y ver valores de variables en tiempo real</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">📚 Consulta la documentación oficial de Arduino y los ejemplos incluidos en el IDE</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">⚠️ Verifica siempre las conexiones antes de energizar para evitar cortos circuitos</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">🎨 Experimenta modificando los ejemplos, cambia valores y observa los resultados</div></div>
+        <div class="mat-item"><div class="mat-dot"></div><div class="mat-text">👥 Únete a la comunidad Arduino — foros y tutoriales siempre disponibles</div></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ─── FOOTER ────────────────────────────────── -->
+  <footer>
+    PROYECTO ELECTRÓNICA · CBTis 144 · <span>2025</span>
+  </footer>
+
+  <script>
+    function show(idx, btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('s' + idx).classList.add('active');
+    }
+
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+    });
+    document.querySelectorAll('button').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%,-50%) scale(2.2)');
+      el.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%,-50%) scale(1)');
+    });
+  </script>
+</body>
+</html>
